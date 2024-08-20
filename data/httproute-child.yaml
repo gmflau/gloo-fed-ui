@@ -1,0 +1,37 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: httproute-child
+  namespace: httpbin
+spec:
+  rules:
+    - matches:
+      - path:
+          type: PathPrefix
+          value: /v1/headers
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              replacePrefixMatch: /headers
+              type: ReplacePrefixMatch
+      backendRefs:
+        - name: httpbin
+          kind: Upstream
+          group: gloo.solo.io
+          namespace: httpbin
+    - matches:
+      - path:
+          type: PathPrefix
+          value: /v1/status
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              replacePrefixMatch: /status
+              type: ReplacePrefixMatch
+      backendRefs:
+        - name: httpbin
+          kind: Upstream
+          group: gloo.solo.io
+          namespace: httpbin

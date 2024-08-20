@@ -1,0 +1,11 @@
+# create a solo upstream for the httpbin service
+apiVersion: gloo.solo.io/v1
+kind: Upstream
+metadata:
+  name: httpbin
+  namespace: httpbin
+spec:
+  kube:
+    serviceName: httpbin
+    serviceNamespace: httpbin
+    servicePort: 8000

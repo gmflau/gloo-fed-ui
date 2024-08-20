@@ -87,102 +87,24 @@ Verify discovered Gloo Gateway instances:
 ```sh
 kubectl get glooinstances -n gloo-system --context $MGMT
 ```
-
+    
+Deploy a sample app:
+```sh
+kubectl create ns httpbin --context $CLUSTER1
+kubectl -n httpbin apply -f https://raw.githubusercontent.com/solo-io/gloo-mesh-use-cases/main/policy-demo/httpbin.yaml --context $CLUSTER1
+kubectl apply -f ./data/upstream.yaml --context $CLUSTER1
+kubectl apply -f ./data/authconfig.yaml --context $CLUSTER1
+kubectl apply -f ./data/virtualservice.yaml --context $CLUSTER1
+kubectl apply -f ./data/routetable-parent.yaml --context $CLUSTER1
+kubectl apply -f ./data/routetable-child.yaml --context $CLUSTER1
+```
+    
 View Read-only Console:
 ```sh
 kubectl port-forward svc/gloo-fed-console -n gloo-system 8090:8090 --context $MGMT
 ```
 ```
 http://localhost:8090
-```
-
-Create the Federated Resources:    
-List available clusters:
-```sh
-kubectl --context $MGMT -n gloo-system get kubernetesclusters
-```
-Create the Federated Upstream:
-```sh
-kubectl apply -f - <<EOF
-apiVersion: fed.gloo.solo.io/v1
-kind: FederatedUpstream
-metadata:
-  name: my-federated-upstream
-  namespace: gloo-system
-spec:
-  placement:
-    clusters:
-      - $CLUSTER1
-      - $CLUSTER2
-    namespaces:
-      - gloo-system
-  template:
-    spec:
-      static:
-        hosts:
-          - addr: solo.io
-            port: 80
-    metadata:
-      name: fed-upstream
-EOF
-```
-Verify the Upstream's creation:
-```sh
-kubectl get federatedupstreams -n gloo-system -oyaml --context $MGMT
-```
-Verify the Upstream is created on $CLUSTER1 and $CLUSTER2 clusters:
-```sh
-kubectl get upstream -n gloo-system fed-upstream --context $CLUSTER1
-kubectl get upstream -n gloo-system fed-upstream --context $CLUSTER2
-```
-
-Create a Federated Virtual Service:
-```sh
-kubectl apply -f - <<EOF
-apiVersion: fed.gateway.solo.io/v1
-kind: FederatedVirtualService
-metadata:
-  name: my-federated-vs
-  namespace: gloo-system
-spec:
-  placement:
-    clusters:
-      - $CLUSTER1
-      - $CLUSTER2
-    namespaces:
-      - gloo-system
-  template:
-    spec:
-      virtualHost:
-        domains:
-          - "*"
-        routes:
-          - matchers:
-              - exact: /solo
-            options:
-              prefixRewrite: /
-            routeAction:
-              single:
-                upstream:
-                  name: fed-upstream
-                  namespace: gloo-system
-    metadata:
-      name: fed-virtualservice
-EOF
-```
-Verify the VirtualService is successfully created:
-```sh
-kubectl get federatedvirtualservice -n gloo-system -oyaml --context $MGMT
-```
-Verify the VirtualService is created on $CLUSTER1 and $CLUSTER2 clusters:
-```sh
-kubectl get virtualservice -n gloo-system fed-virtualservice --context $CLUSTER1
-kubectl get virtualservice -n gloo-system fed-virtualservice --context $CLUSTER2
-```
-
-Check all the federated resources:
-```sh
-glooctl check
 ```
 
 Tear down the environment:

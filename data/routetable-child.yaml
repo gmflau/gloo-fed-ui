@@ -1,0 +1,26 @@
+apiVersion: gateway.solo.io/v1
+kind: RouteTable
+metadata:
+  annotations: {}
+  name: httpbin-child
+  namespace: httpbin
+spec:
+  routes:
+    - matchers:
+        - prefix: /v1/headers
+      options:
+        prefixRewrite: /headers
+      routeAction:
+        single:
+          upstream:
+            name: httpbin
+            namespace: httpbin
+    - matchers:
+        - prefix: /v1/status
+      options:
+        prefixRewrite: /status
+      routeAction:
+        single:
+          upstream:
+            name: httpbin
+            namespace: httpbin

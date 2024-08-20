@@ -171,19 +171,24 @@ Verify discovered Gloo Gateway instances:
 ```sh
 kubectl get glooinstances -n gloo-system --context $MGMT
 ```
-
+    
+Deploy a sample app:
+```sh
+kubectl create ns httpbin --context $CLUSTER1
+kubectl -n httpbin apply -f https://raw.githubusercontent.com/solo-io/gloo-mesh-use-cases/main/policy-demo/httpbin.yaml --context $CLUSTER1
+kubectl apply -f ./data/upstream.yaml --context $CLUSTER1
+kubectl apply -f ./data/authconfig.yaml --context $CLUSTER1
+kubectl apply -f ./data/virtualservice.yaml --context $CLUSTER1
+kubectl apply -f ./data/routetable-parent.yaml --context $CLUSTER1
+kubectl apply -f ./data/routetable-child.yaml --context $CLUSTER1
+```
+    
 View Read-only Console:
 ```sh
 kubectl port-forward svc/gloo-fed-console -n gloo-system 8090:8090 --context $MGMT
 ```
 ```
 http://localhost:8090
-```
-
-Check all the federated resources:
-```sh
-kubectl config use-context $MGMT
-glooctl check
 ```
 
 Tear down the environment:

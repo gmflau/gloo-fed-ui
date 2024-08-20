@@ -1,0 +1,22 @@
+apiVersion: gateway.solo.io/v1
+kind: VirtualService
+metadata:
+  annotations: {}
+  name: httpbin
+  namespace: httpbin
+spec:
+  virtualHost:
+    domains:
+      - www.example3.com
+      - www.example4.com
+    routes:
+      - delegateAction:
+          selector:
+            labels:
+              domain: httpbin-domain
+            namespaces:
+              - httpbin
+        matchers:
+          - prefix: /
+        options:
+          autoHostRewrite: true

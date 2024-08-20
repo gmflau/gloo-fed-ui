@@ -1,0 +1,26 @@
+apiVersion: gateway.solo.io/v1
+kind: RouteTable
+metadata:
+  annotations: {}
+  labels:
+    domain: httpbin-domain
+  name: httpbin-parent
+  namespace: httpbin
+spec:
+  routes:
+    - delegateAction:
+        ref:
+          name: httpbin-child
+          namespace: httpbin
+      matchers:
+        - prefix: /v1
+      options:
+        extauth:
+          configRef:
+            name: basic-auth
+            namespace: gloo-system
+        retries:
+          numRetries: 3
+          perTryTimeout: 15s
+          retryOn: connect-failure
+        timeout: 45s
