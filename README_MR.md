@@ -14,11 +14,16 @@ export CLUSTER2=cluster2
 ```
 ```sh
 ./scripts/deploy.sh 1 $MGMT
+
+# hostport for 1st workload: 7002
 ./scripts/deploy.sh 2 $CLUSTER1
 export ${CLUSTER1}_host_port=7002
+
+# hostport for 2nd workload: 7003
 ./scripts/deploy.sh 3 $CLUSTER2
 export ${CLUSTER2}_host_port=7003
 ```
+
 View clusters:
 ```
 kubectl get nodes --context $MGMT
@@ -54,12 +59,6 @@ helm install gloo glooe/gloo-ee --namespace gloo-system \
 helm install gloo glooe/gloo-ee --namespace gloo-system \
   --create-namespace --set-string license_key=$GLOO_LICENSE_KEY \
   --version $GLOO_VERSION --kube-context $CLUSTER2
-```
-
-Grab the Gloo Edge API server ports:
-```sh
-# export ${CLUSTER1}_api_port=$(docker inspect  kind1-control-plane | jq -r '.[0].NetworkSettings.Ports | to_entries[] | select(.value != null) | .value[] | select(.HostIp == "0.0.0.0") | .HostPort')
-# export ${CLUSTER2}_api_port=$(docker inspect  kind2-control-plane | jq -r '.[0].NetworkSettings.Ports | to_entries[] | select(.value != null) | .value[] | select(.HostIp == "0.0.0.0") | .HostPort')
 ```
 
 Manual registration of workload clusters:
@@ -120,13 +119,12 @@ subjects:
   namespace: gloo-system
 EOF
 
-api_port=$(eval "echo \${${CLUSTER}_host_port}")
   cat > kc-${CLUSTER}.yaml <<EOF1
 apiVersion: v1
 clusters:
 - cluster:
     certificate-authority-data: "" # DO NOT empty the value here unless you are using KinD
-    server: https://host.docker.internal:$api_port # enter the api-server address of the target cluster
+    server: https://host.docker.internal:$(eval "echo \${${CLUSTER}_host_port}") # enter the api-server address of the target cluster
     insecure-skip-tls-verify: true # DO NOT use this unless you know what you are doing
   name: $CLUSTER
 contexts:
