@@ -1,0 +1,19 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: "" # DO NOT empty the value here unless you are using KinD
+    server: https://host.docker.internal:65404 # enter the api-server address of the target cluster
+    insecure-skip-tls-verify: true # DO NOT use this unless you know what you are doing
+  name: cluster2
+contexts:
+- context:
+    cluster: cluster2
+    user: cluster2
+  name: cluster2
+current-context: cluster2
+kind: Config
+preferences: {}
+users:
+- name: cluster2
+  user:
+    token: eyJhbGciOiJSUzI1NiIsImtpZCI6IkY2aExHeFNINzJPS2Z3VENvWnliRXBJWkk1MkR2U2pWbzFCT1RqbUNaNkUifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNzI0MTI1NTM5LCJpYXQiOjE3MjQxMjE5MzksImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJnbG9vLXN5c3RlbSIsInNlcnZpY2VhY2NvdW50Ijp7Im5hbWUiOiJjbHVzdGVyMiIsInVpZCI6IjA1MzVlZjFmLWZlODQtNGM3Zi1hZWZmLWQ2Njk2MjY5YjY1MiJ9fSwibmJmIjoxNzI0MTIxOTM5LCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6Z2xvby1zeXN0ZW06Y2x1c3RlcjIifQ.EsTPaQpMBmAzx0Ugc62THEOWGANlA1dsi6R33_Gg9Gx-JbeJB6HewxqpsrK1HXkJU0FU5K_NjdrawPRvzD_2uIRn1p4WATe9fcrj9elagX25D8AgNO5WhJpNec69z3imnHBDKY1hUK4O34yCWZFIjqtjYkRcb63HgHjLZh7zTAhxtkaoAllwVtOARyZNYqEyD2oInX_aOnDYEkqfpZKPG-mjdAAJ3BGplOGL3xxqF3vHzyIniPuvLT7qVmFGh29ObwVg50yk27cJkCHwltW8EGjkqwIR6HKEUnjzQzW045RRYWqAypb2Rx_sQkUxQ44QkMaKnlr7oUCpZH1SGwPoJA
