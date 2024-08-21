@@ -1,0 +1,13 @@
+datadog:
+  logs:
+    ## @param enabled - boolean - optional - default: false
+    ## Enables this to activate Datadog Agent log collection.
+    ## ref: https://docs.datadoghq.com/containers/kubernetes/log/
+    #
+    enabled: true
+
+    ## @param containerCollectAll - boolean - optional - default: false
+    ## Enable this to allow log collection for all containers.
+    ## ref: https://docs.datadoghq.com/containers/kubernetes/log/
+    #
+    containerCollectAll: true

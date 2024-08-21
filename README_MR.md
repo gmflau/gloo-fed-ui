@@ -140,9 +140,8 @@ users:
   user:
     token: $token
 EOF1
-  export kc_${CLUSTER}=$(cat kc-${CLUSTER}.yaml | base64)
-  echo
 
+  export kc_${CLUSTER}=$(cat kc-${CLUSTER}.yaml | base64)
   kubectl --context $MGMT apply -f - <<EOF2
 ---
 apiVersion: multicluster.solo.io/v1alpha1
