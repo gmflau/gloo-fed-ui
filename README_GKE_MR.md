@@ -1,5 +1,7 @@
 ## Gloo Edge Federation (dedicated admin cluster) on GKE clusters and Manual Registration
 
+![GE Fed UI - DAC](./assets/GE_Fed_DAC.png)
+
 Install glooctl:
 ```sh
 curl -sL https://run.solo.io/gloo/install | sh
