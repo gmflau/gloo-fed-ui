@@ -111,15 +111,16 @@ helm install gloo glooe/gloo-ee --namespace gloo-system \
 
 Manual Registration of workload clusters:
 ```sh
-clusters=($CLUSTER1_CONTEXT $CLUSTER2_CONTEXT) 
-for CLUSTER in "${clusters[@]}"; do
+clusters=("$CLUSTER1:$CLUSTER1_CONTEXT" "$CLUSTER2:$CLUSTER2_CONTEXT") 
+for element in "${clusters[@]}"; do
+  
+  cluster_name=${element%%:*}
+  cluster_context=${element##*:}
+  kubectl --context $cluster_context -n gloo-system create sa $cluster_name
+  token=$(kubectl create token $cluster_name -n gloo-system --context $cluster_context)
+  kubectl create secret generic $cluster_name -n gloo-system --context $cluster_context --from-literal=token="$token"
 
-  cluster_name=$(echo $CLUSTER | tr '-' '_')
-  kubectl --context $CLUSTER -n gloo-system create sa $cluster_name
-  token=$(kubectl create token $cluster_name -n gloo-system --context $CLUSTER)
-  kubectl create secret generic $cluster_name -n gloo-system --context $CLUSTER --from-literal=token="$token"
-
-  kubectl --context $CLUSTER -n gloo-system apply -f - <<EOF
+  kubectl --context $cluster_context -n gloo-system apply -f - <<EOF
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -158,58 +159,59 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: ${CLUSTER}-gloo-federation-controller-clusterrole-binding
+  name: ${cluster_name}-gloo-federation-controller-clusterrole-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: gloo-federation-controller
 subjects:
 - kind: ServiceAccount
-  name: $CLUSTER
+  name: $cluster_name
   namespace: gloo-system
 EOF
 
-  cat > kc-${CLUSTER}.yaml <<EOF1
+  cat > kc-${cluster_name}.yaml <<EOF1
 apiVersion: v1
 clusters:
 - cluster:
-    certificate-authority-data: $(eval kubectl config view --raw | yq ".clusters[] | select(.name == \"$CLUSTER\") | .cluster.\"certificate-authority-data\"")
-    server: $(eval kubectl config view --raw | yq ".clusters[] | select(.name == \"$CLUSTER\") | .cluster.server")
-  name: $CLUSTER
+    certificate-authority-data: $(eval kubectl config view --raw | yq ".clusters[] | select(.name == \"$cluster_context\") | .cluster.\"certificate-authority-data\"")
+    server: $(eval kubectl config view --raw | yq ".clusters[] | select(.name == \"$cluster_context\") | .cluster.server")
+  name: $cluster_context
 contexts:
 - context: 
-    cluster: $CLUSTER
-    user: $CLUSTER
-  name: $CLUSTER
-current-context: $CLUSTER
+    cluster: $cluster_context
+    user: $cluster_context
+  name: $cluster_context
+current-context: $cluster_context
 kind: Config
 preferences: {}
 users:
-- name: $CLUSTER
+- name: $cluster_context
   user:
     token: $token
 EOF1
   
-  export kc_${cluster_name}=$(cat kc-${CLUSTER}.yaml | base64)
+  cluster_env_name=$(echo $cluster_name | tr '-' '_')
+  export kc_${cluster_env_name}=$(cat kc-${cluster_name}.yaml | base64)
   kubectl --context $MGMT_CONTEXT apply -f - <<EOF2
 ---
 apiVersion: multicluster.solo.io/v1alpha1
 kind: KubernetesCluster
 metadata:
-  name: $CLUSTER
+  name: $cluster_name
   namespace: gloo-system
 spec:
   clusterDomain: cluster.local
-  secretName: $CLUSTER
+  secretName: $cluster_name
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: $CLUSTER
+  name: $cluster_name
   namespace: gloo-system
 type: solo.io/kubeconfig
 data:
-  kubeconfig: $(eval "echo \${kc_${cluster_name}}") 
+  kubeconfig: $(eval "echo \${kc_${cluster_env_name}}") 
 EOF2
 done
 ```
