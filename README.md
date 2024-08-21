@@ -35,9 +35,9 @@ helm repo update
 ```sh
 helm install gloo-fed gloo-fed/gloo-fed --version $GLOO_VERSION --set license_key=$GLOO_LICENSE_KEY -n gloo-system --create-namespace --kube-context $MGMT
 ```
-View status:
+View rollout status:
 ```sh
-kubectl get all -n gloo-system --context $MGMT
+kubectl rollout status deployment/gloo-fed-console -n gloo-system --context $MGMT
 ```
 
 Install Gloo Gateway Enterprise on workload clusters:
